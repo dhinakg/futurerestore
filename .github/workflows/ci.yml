@@ -104,3 +104,40 @@ jobs:
           name: futurerestore-Linux-x86_64-DEBUG
           path: |
             /home/runner/work/futurerestore/futurerestore/.github/workflows/futurerestore-Linux-x86_64*-DEBUG.tar.xz
+  Windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+          fetch-depth: 0
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: wget sed mingw-w64-x86_64-cc
+
+      - name: Windows Build
+        run: |
+         wget https://raw.githubusercontent.com/opa334/futurerestore-compile-windows/main/build.sh
+         sed -i 's/git clone --recursive https:\/\/github.com\/marijuanARM\/futurerestore/git clone --recursive https:\/\/github.com\/m1stadev\/futurerestore --branch test/' build.sh
+         ./build.sh
+         ls -lsall
+      - name: futurerestore Linux x86_64 RELEASE Archive
+        id: futurerestore-Linux-x86_64-RELEASE-Archive
+        uses: actions/upload-artifact@v2
+        with:
+          name: futurerestore-Linux-x86_64-RELEASE
+          path: |
+            /home/runner/work/futurerestore/futurerestore/.github/workflows/futurerestore-Linux-x86_64*-RELEASE.tar.xz
+      - name: futurerestore Linux x86_64 DEBUG Archive
+        id: futurerestore-Linux-x86_64-DEBUG-Archive
+        uses: actions/upload-artifact@v2
+        with:
+          name: futurerestore-Linux-x86_64-DEBUG
+          path: |
+            /home/runner/work/futurerestore/futurerestore/.github/workflows/futurerestore-Linux-x86_64*-DEBUG.tar.xz
