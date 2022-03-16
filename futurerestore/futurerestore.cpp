@@ -114,6 +114,8 @@ futurerestore::futurerestore(bool isUpdateInstall, bool isPwnDfu, bool noIBSS, b
 
     nocache = 1; //tsschecker nocache
     _foundnonce = -1;
+    _useCustomLatest = false;
+    _customLatest = std::string("");
 }
 
 bool futurerestore::init() {
@@ -1039,7 +1041,7 @@ void futurerestore::doRestore(const char *ipsw) {
                  (_isUpdateInstall) ? "Update" : "Erase", (!_isUpdateInstall) ? "Update" : "Erase");
         }
 
-        client->bbfwtmp = (char *)basebandTempPath.c_str();
+        client->bbfwtmp = (char *)this->_basebandPath.c_str();
 
         plist_t bb_manifest = plist_dict_get_item(client->basebandBuildIdentity, "Manifest");
         plist_t bb_baseband = plist_copy(plist_dict_get_item(bb_manifest, "BasebandFirmware"));
@@ -1421,6 +1423,22 @@ char *futurerestore::getLatestManifest() {
             if (--versionCnt == 0)
                 reterror("[TSSC] automatic selection of firmware couldn't find for non-beta versions\n");
         }
+        if(_useCustomLatest) {
+            i = 0;
+            while(i < versionCnt) {
+                versVals.version = strdup(versions[i++]);
+                std::string version(versVals.version);
+                if(!std::equal(_customLatest.begin(), _customLatest.end(), version.begin())) {
+                    free((char *) versVals.version);
+                } else {
+                    i = -1;
+                    break;
+                }
+            }
+            if(i != -1) {
+                reterror("[TSSC] failed to find custom version for device!\n");
+            }
+        }
         info("[TSSC] selecting latest firmware version: %s\n", versVals.version);
         if (bpos) *bpos = '\0';
         if (versions) free(versions[versionCnt - 1]), free(versions);
@@ -1548,8 +1566,8 @@ void futurerestore::downloadLatestVeridian() {
     }
     if (veridianFWMStr) {
         info("downloading Veridian FirmwareMap\n\n");
-        retassure(!downloadPartialzip(getLatestFirmwareUrl(), veridianDGMStr, veridianFWMTempPath.c_str()),
-                  "could not download Veridian DigestMap\n");
+        retassure(!downloadPartialzip(getLatestFirmwareUrl(), veridianFWMStr, veridianFWMTempPath.c_str()),
+                  "could not download Veridian FirmwareMap\n");
     }
     if (veridianDGMStr && veridianFWMStr)
         loadVeridian(veridianDGMTempPath, veridianFWMTempPath);
@@ -1584,9 +1602,9 @@ void futurerestore::downloadLatestBaseband() {
               "could not download baseband\n");
     saveStringToFile(manifeststr, basebandManifestTempPath.c_str());
     setBasebandPath(basebandTempPath);
-    setBasebandPath(basebandManifestTempPath);
-    loadBaseband(basebandTempPath);
-    loadBasebandManifest(basebandManifestTempPath);
+    setBasebandManifestPath(basebandManifestTempPath);
+    loadBaseband(this->_basebandPath);
+    loadBasebandManifest(this->_basebandManifestPath);
 }
 
 void futurerestore::downloadLatestSep() {
@@ -1594,9 +1612,11 @@ void futurerestore::downloadLatestSep() {
     char *pathStr = getPathOfElementInManifest("SEP", manifeststr, getDeviceBoardNoCopy(), 0);
     info("downloading SEP\n\n");
     retassure(!downloadPartialzip(getLatestFirmwareUrl(), pathStr, sepTempPath.c_str()), "could not download SEP\n");
-    loadSep(sepTempPath);
     saveStringToFile(manifeststr, sepManifestTempPath.c_str());
-    loadSepManifest(sepManifestTempPath);
+    setSepPath(sepTempPath);
+    setSepManifestPath(sepManifestTempPath);
+    loadSep(this->_sepPath);
+    loadSepManifest(this->_sepManifestPath);
 }
 
 void futurerestore::loadSepManifest(std::string sepManifestPath) {
