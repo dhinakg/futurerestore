@@ -25,7 +25,7 @@ jobs:
 
       - name: Windows Build
         run: |
-         wget https://raw.githubusercontent.com/dhinakg/futurerestore-compile-windows/ed40e16a40bae59d5594a0331ceae7b281048194/build.sh
+         wget https://raw.githubusercontent.com/dhinakg/futurerestore-compile-windows/3e64a150958308bade078a9b5088892c3d3ddcef/build.sh
          ./build.sh
          ls -lsall
       - name: futurerestore Linux x86_64 RELEASE Archive
