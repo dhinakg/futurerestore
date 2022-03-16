@@ -123,8 +123,7 @@ jobs:
 
       - name: Windows Build
         run: |
-         wget https://raw.githubusercontent.com/opa334/futurerestore-compile-windows/main/build.sh
-         sed -i 's/git clone --recursive https:\/\/github.com\/marijuanARM\/futurerestore/git clone --recursive https:\/\/github.com\/m1stadev\/futurerestore --branch test/' build.sh
+         wget https://raw.githubusercontent.com/dhinakg/futurerestore-compile-windows/main/build.sh
          ./build.sh
          ls -lsall
       - name: futurerestore Linux x86_64 RELEASE Archive
