@@ -119,7 +119,7 @@ jobs:
         with:
           msystem: MINGW64
           update: true
-          install: wget sed mingw-w64-x86_64-cc
+          install: wget sed mingw-w64-x86_64-cc openssl
 
       - name: Windows Build
         run: |
