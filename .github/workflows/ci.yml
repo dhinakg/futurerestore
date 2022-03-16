@@ -21,7 +21,7 @@ jobs:
         with:
           msystem: MINGW64
           update: true
-          install: wget sed mingw-w64-x86_64-cc openssl mingw-w64-x86_64-cmake mingw-w64-x86_64-make 
+          install: wget sed
 
       - name: Windows Build
         run: |
